@@ -31,8 +31,8 @@ class BPE():
 
         [('Hello', (0, 5)), ('world', (6, 11))]
 
-        • "Hello" muncul di posisi 0 sampai 5
-	    • "world" muncul di posisi 6 sampai 11
+        • "Hello" appear at position 0 till 5
+	    • "world" appear at position 6 till 11
         """
 
         # compute the frequency of each word in the corpus
@@ -44,63 +44,63 @@ class BPE():
             for word in new_words:
                 self.word_freqs[word] += 1
 
-            # Base vocab for all possible characters in the corpus
-            alphabet = []
-            for word in self.word_freqs.keys():
-                for letter in word:
-                    if letter not in alphabet:
-                        alphabet.append(letter)
-            alphabet.sort()
-            
-            # prepand a special token for each characters in the alphabet, this vocab will
-            # contain all possible subwords in the corpus and will be updated during training for the
-            # combination of characters
-            """ "abc" prepended with "X" → "Xabc" """
-            vocab = ['</w>'] + alphabet.copy()
+        # Base vocab for all possible characters in the corpus
+        alphabet = []
+        for word in self.word_freqs.keys():
+            for letter in word:
+                if letter not in alphabet:
+                    alphabet.append(letter)
+        alphabet.sort()
+        
+        # prepand a special token for each characters in the alphabet, this vocab will
+        # contain all possible subwords in the corpus and will be updated during training for the
+        # combination of characters
+        """ "abc" prepended with "X" → "Xabc" """
+        vocab = ['</w>'] + alphabet.copy()
 
-            # split each word into individual characters before training
+        # split each word into individual characters before training
+        """
+        self.splits = {
+        'hello': ['h', 'e', 'l', 'l', 'o'],
+        'world': ['w', 'o', 'r', 'l', 'd']}
+        """
+        self.splits = {
+            word: [c for c in word] for word in self.word_freqs.keys()
+        }
+
+        while len(vocab) < self.vocab_size:
             """
-            self.splits = {
-            'hello': ['h', 'e', 'l', 'l', 'o'],
-            'world': ['w', 'o', 'r', 'l', 'd']}
+            Untill vocab reaches the desire size:
+            1. Count the character pair frequencies
+            2. Find the most frequent pair
+            - pair_freqs = {('l', 'o'): 3, ('h', 'e'): 5, ('e', 'l'): 2}
+            - best_pair = ('h', 'e')  # 5 (max freq = 5)
+            3. Merge that pair in all words that have it
+            4. Update Vocab and store the merge
             """
-            self.splits = {
-                word: [c for c in word] for word in self.word_freqs.keys()
-            }
 
-            while len(vocab) < self.vocab_size:
-                """
-                Untill vocab reaches the desire size:
-                1. Count the character pair frequencies
-                2. Find the most frequent pair
-                - pair_freqs = {('l', 'o'): 3, ('h', 'e'): 5, ('e', 'l'): 2}
-                - best_pair = ('h', 'e')  # 5 (max freq = 5)
-                3. Merge that pair in all words that have it
-                4. Update Vocab and store the merge
-                """
+            # 1. Count the character pair frequencies
+            pair_freqs = self.compute_pair_freqs()
 
-                # 1. Count the character pair frequencies
-                pair_freqs = self.compute_pair_freqs()
+            # Additional: check if there are any pair to merge
+            if not pair_freqs:
+                print("No pair to merge, vocab size is already reached")
+                break
 
-                # Additional: check if there are any pair to merge
-                if not pair_freqs:
-                    print("No pair to merge, vocab size is already reached")
-                    break
+            # 2. Find the most frequent pair
+            best_pair = max(pair_freqs, key=pair_freqs.get)
 
-                # 2. Find the most frequent pair
-                best_pair = max(pair_freqs, key=pair_freqs.get)
+            # 3. Merge that pair in all words that have it
+            self.splits = self.merge_pair(best_pair[0], best_pair[1])
+            self.merges[best_pair] = best_pair[0] + best_pair[1]
 
-                # 3. Merge that pair in all words that have it
-                self.splits = self.merge_pair(best_pair[0], best_pair[1])
-                self.merges[best_pair] = best_pair[0] + best_pair[1]
-
-                # 4. Update Vocab and store the merge
-                """
-                vocab = ['t', 'h']
-                vocab.append(best_pair[0] + best_pair[1])
-                vocab = ['t', 'h', 'he']
-                """
-                vocab.append(best_pair[0] + best_pair[1])
+            # 4. Update Vocab and store the merge
+            """
+            vocab = ['t', 'h']
+            vocab.append(best_pair[0] + best_pair[1])
+            vocab = ['t', 'h', 'he']
+            """
+            vocab.append(best_pair[0] + best_pair[1])
 
     
     def compute_pair_freqs(self):
@@ -134,10 +134,10 @@ class BPE():
             ('l', 'o'): 2
             }
             """
-            return pair_freqs
+        return pair_freqs
         
     
-    def merge_pair(self, pair):
+    def merge_pair(self, a, b):
         """
         goes to all words already split into subwords and merges the pair, if its consecutive(same)
         1. Combines them into a+b only where they appear consecutively
@@ -150,8 +150,9 @@ class BPE():
         new_splits = {}
         
         for word in self.word_freqs:
-            split = self.splits[word]   # one of words, splits["hello"] = ['h', 'e', 'l', 'l', 'o']`
-            if len(split) == 1:         # helo = ['h', 'e', 'l', 'o']
+            split = self.splits[word]       # one of words, splits["hello"] = ['h', 'e', 'l', 'l', 'o']`
+            if len(split) == 1:             # helo = ['h', 'e', 'l', 'o']
+                new_splits[word] = split    # adding single chars to new_splits
                 continue
 
             new_split = []
@@ -163,7 +164,7 @@ class BPE():
                     # ['h', 'e', 'l', 'l', 'o']
                     # split[2] == 'l', split[3] == 'l' → concecutive → be 'll'
                     # Recent result: ['h', 'e', 'll']
-                    new_split.append(merge)
+                    new_split.append(a + b)
                     i += 2 # Skip next characterL cause already merged
                 else:
                     new_split.append(split[i]) # append the character it self if not a pair (a, b)
@@ -224,4 +225,3 @@ class BPE():
         ......
         """
         return result
-
