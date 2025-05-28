@@ -16,6 +16,19 @@ Byte-Pair Encoding is a data compression technique that iteratively replaces the
 
 ## Usage
 
+### Installation
+
+First, install the required dependencies:
+
+```bash
+pip install transformers
+```
+Second, run the pretrain_bpe_model.py file to pretrain the BPE model on the sample data.
+
+```bash
+python pretrain_bpe_model.py
+```
+
 ### Training a BPE Model
 ```python
 from bpe_model import BPE
