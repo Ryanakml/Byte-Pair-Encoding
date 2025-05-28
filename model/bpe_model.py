@@ -132,7 +132,7 @@ class BPE():
             return pair_freqs
         
     
-    def merge_pair(self, a, b):
+    def merge_pair(self, pair):
         """
         goes to all words already split into subwords and merges the pair, if its consecutive(same)
         1. Combines them into a+b only where they appear consecutively
@@ -141,7 +141,8 @@ class BPE():
         split = ['h', 'e', 'l', 'l', 'o']
         new_split = ['h', 'e', 'll', 'o']
         """
-
+        a, b = pair  # Unpack the tuple
+        
         for word in self.word_freqs:
             split = self.splits[word]   # one of words, splits["hello"] = ['h', 'e', 'l', 'l', 'o']`
             if len(split) == 1:         # helo = ['h', 'e', 'l', 'o']
