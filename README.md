@@ -1,84 +1,233 @@
+Here is the professional and polished English version of your Markdown documentation file for the Byte-Pair Encoding (BPE) Tokenizer project:
+
+---
+
 # Byte-Pair Encoding (BPE) Tokenizer
-A Python implementation of the Byte-Pair Encoding algorithm for subword-based tokenization from scratch. This project provides a clean implementation of BPE, which is a fundamental technique used in modern NLP models like GPT, BERT, and others.
+
+A clean and minimal Byte-Pair Encoding implementation for subword-based tokenization using Python. This project provides a foundational approach to BPE — a key technique widely used in modern NLP models such as GPT, BERT, and others.
+
+---
+
+## Table of Contents
+
+* [Overview](#overview)
+* [Project Structure](#project-structure)
+* [Features](#features)
+* [Requirements](#requirements)
+* [Installation](#installation)
+* [Usage](#usage)
+
+  * [Pretraining](#pretraining)
+  * [Testing](#testing)
+  * [Customization](#customization)
+* [How BPE Works](#how-bpe-works)
+* [Hyperparameters](#hyperparameters)
+* [Training Data](#training-data)
+* [Applications](#applications)
+* [References](#references)
+* [License](#license)
+
+---
 
 ## Overview
-Byte-Pair Encoding is a data compression technique that iteratively replaces the most frequent pair of bytes in a sequence with a single, unused byte. In NLP, it's adapted to merge the most frequent character pairs in a corpus, creating a vocabulary of subword units that balances vocabulary size and token length.
+
+Byte-Pair Encoding (BPE) is a compression algorithm that iteratively replaces the most frequent pair of bytes (or characters) in a sequence with a single unused byte. In NLP, it is adapted to merge frequently occurring character pairs in a corpus, enabling the creation of subword units that strike a balance between vocabulary size and token granularity.
+
+---
+
+## Project Structure
+
+```
+/
+├── README.md             # Project documentation  
+├── license               # MIT license  
+├── citation/             # Reference papers  
+│   └── 1508.07909v5.pdf  
+├── data/                 # Training data  
+│   └── data.txt          # Sample corpus  
+├── model/                # Model implementation  
+│   └── bpe_model.py      # BPE algorithm  
+├── pretrain/             # Pretraining script  
+│   └── pretrain.py       # Train and save model  
+└── test/                 # Testing scripts  
+    └── test_bpe.py       # Evaluate trained model  
+```
+
+---
 
 ## Features
-- Pure Python implementation of BPE tokenization algorithm
-- BERT-style pre-tokenization for initial word splitting
-- Configurable vocabulary size
-- Training on custom corpora
-- Tokenization of new text using the trained model
+
+* Pure Python implementation of Byte-Pair Encoding
+* BERT-style pre-tokenization for word-level segmentation
+* Configurable vocabulary size
+* Trainable on any custom corpus
+* Tokenize new text using trained models
+
+---
 
 ## Requirements
-`pip install transformers, collections`
 
-## Usage
+This project requires the following libraries:
 
-### Installation
+```
+transformers  
+collections  
+pickle
+```
 
-First, install the required dependencies:
+---
+
+## Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/username/bpe-tokenizer.git
+cd bpe-tokenizer
+```
+
+2. Install dependencies:
 
 ```bash
 pip install transformers
 ```
-Second, run the pretrain_bpe_model.py file to pretrain the BPE model on the sample data.
+
+---
+
+## Usage
+
+### Pretraining
+
+Train the BPE tokenizer and save the model:
 
 ```bash
-python pretrain_bpe_model.py
+python pretrain/pretrain.py
 ```
 
-### Training a BPE Model
-```python
-from bpe_model import BPE
+This script will:
 
-# Load your corpus
-with open('your_corpus.txt', encoding="utf8") as f:
+1. Load the corpus from `data/data.txt`
+2. Train the BPE model with a vocabulary size of 1000
+3. Save the trained model to `pretrain/bpe_model.pkl`
+
+---
+
+### Testing
+
+Test the trained model on a sample or custom text:
+
+```bash
+python test/test_bpe.py
+```
+
+Or specify your own text:
+
+```bash
+python test/test_bpe.py "Your custom text to tokenize here"
+```
+
+---
+
+### Customization
+
+Use BPE directly in your own code:
+
+```python
+from model.bpe_model import BPE
+import pickle
+
+# Option 1: Train a new model
+with open('data/data.txt', encoding="utf8") as f:
     corpus = f.readlines()
 
-# Set the desired vocabulary size
 vocab_size = 1000
-
-# Create and train the BPE tokenizer
 tokenizer = BPE(corpus=corpus, vocab_size=vocab_size)
 tokenizer.train()
 
-# Tokenize new text
 text = "Hello world!"
 tokens = tokenizer.tokenize(text)
 print(tokens)
+
+# Save the model
+with open('my_model.pkl', 'wb') as f:
+    pickle.dump(tokenizer, f)
+
+# Option 2: Load an existing model
+with open('pretrain/bpe_model.pkl', 'rb') as f:
+    loaded_tokenizer = pickle.load(f)
+
+tokens = loaded_tokenizer.tokenize("Text to tokenize")
+print(tokens)
 ```
 
-Example Output:
+To customize the vocabulary size or use a different corpus, edit `pretrain/pretrain.py`.
 
-'Love, hate, or feel meh about Harry Potter, it's hard to argue that J.K. Rowling filled the books with intentional writing choices. From made up words to the meanings of names to the well-scripted first and last lines of each novel, Rowling wanted to the writing to match the intricate fantasy world she created for the now-iconic boy wizard. To examine a few of these choices, I'll be taking a closer look at the first line of Harry Potter, as well as the last lines, from all of the Harry Potter novels.'
+---
 
-Tokenized Output:
+## How BPE Works
 
-['L', 'ov', 'e', ',', 'h', 'ate', ',', 'or', 'fe', 'el', 'me', 'h', 'about', 'H', 'ar', 'ry', 'P', 'ot', 'ter', ',', 'it', ''', 's', 'h', 'ard', 'to', 'ar', 'g', 'ue', 'that', 'J', '.', 'K', '.', 'R', 'ow', 'l', 'ing', 'f', 'ill', 'ed', 'the', 'bo', 'ok', 's', 'with', 'int', 'ent', 'ional', 'writ', 'ing', 'cho', 'ic', 'es', '.', 'F', 'rom', 'made', 'up', 'w', 'ord', 's', 'to', 'the', 'me', 'an', 'ing', 's', 'of', 'n', 'ames', 'to', 'the', 'well', '-', 'sc', 'ri', 'pt', 'ed', 'first', 'and', 'l', 'ast', 'l', 'in', 'es', 'of', 'e', 'ach', 'n', 'ov', 'el', ',', 'R', 'ow', 'l', 'ing', 'w', 'ant', 'ed', 'to', 'the', 'writ', 'ing', 'to', 'm', 'at', 'ch', 'the', 'in', 'tr', 'ic', 'ate', 'f', 'ant', 'as', 'y', 'w', 'orld', 'she', 'cre', 'ated', 'for', 'the', 'n', 'ow', '-', 'ic', 'on', 'ic', 'bo', 'y', 'w', 'iz', 'ard', '.', 'T', 'o', 'ex', 'am', 'ine', 'a', 'f', 'ew', 'of', 'the', 'se', 'cho', 'ic', 'es', ',', 'I', ''', 'l', 'l', 'be', 't', 'ak', 'ing', 'a', 'c', 'lo', 'ser', 'lo', 'ok', 'at', 'the', 'first', 'l', 'ine', 'of', 'H', 'ar', 'ry', 'P', 'ot', 'ter', ',', 'as', 'well', 'as', 'the', 'l', 'ast', 'l', 'in', 'es', ',', 'from', 'all', 'of', 'the', 'H', 'ar', 'ry', 'P', 'ot', 'ter', 'n', 'ov', 'el', 's', '.']  
+The BPE algorithm operates in the following steps:
 
-## How It Works
-1. Pre-tokenization : The text is first split into words using BERT's pre-tokenizer
-2. Character-level splitting : Each word is split into individual characters
-3. Pair frequency counting : The algorithm counts the frequency of each adjacent character pair
-4. Merging : The most frequent pair is merged into a new token
-5. Iteration : Steps 3-4 are repeated until the desired vocabulary size is reached
+1. **Pre-tokenization**: Split text into words using a BERT-style tokenizer
+2. **Character-level splitting**: Break each word into individual characters
+3. **Pair frequency counting**: Count the frequency of each adjacent character pair
+4. **Merging**: Replace the most frequent pair with a new token
+5. **Iteration**: Repeat steps 3–4 until the target vocabulary size is reached
+
+Example:
+
+Input:
+
+```
+Love, hate, or feel meh about Harry Potter, it's hard to argue that J.K. Rowling filled the books with intentional writing choices.
+```
+
+Output tokens:
+
+```
+['L', 'ov', 'e', ',', 'h', 'ate', ',', 'or', 'fe', 'el', 'me', 'h', 'about', 'H', 'ar', 'ry', 'P', 'ot', 'ter', ',', 'it', "'", 's', 'h', 'ard', 'to', 'ar', 'g', 'ue', 'that', 'J', '.', 'K', '.', 'R', 'ow', 'l', 'ing', 'f', 'ill', 'ed', 'the', 'bo', 'ok', 's', 'with', 'int', 'ent', 'ional', 'writ', 'ing', 'cho', 'ic', 'es', '.']
+```
+
+---
 
 ## Hyperparameters
-- Vocabulary size : The target size of the subword vocabulary (base characters + learned merges)
+
+* **Vocabulary Size**: Number of unique subword tokens (base characters + learned merges)
+
+---
 
 ## Training Data
-For training, you can use:
 
-- The included sample data
-- Wikipedia corpus 
-- Any custom text corpus
+Use one of the following for training:
+
+* The included sample corpus in `data/`
+* Wikipedia dump or any large-scale corpus
+* Custom text files in plain format
+
+---
 
 ## Applications
-- Text preprocessing for NLP models
-- Understanding tokenization in transformer models
-- Educational purposes for learning about subword tokenization
+
+* Text preprocessing for NLP models
+* Understanding how Transformer tokenizers work
+* Educational tool to study subword tokenization
+
+---
+
+## References
+
+* [Neural Machine Translation of Rare Words with Subword Units](https://arxiv.org/abs/1508.07909)
+* [Byte Pair Encoding - Wikipedia](https://en.wikipedia.org/wiki/Byte_pair_encoding)
+* [Hugging Face Tokenizers](https://huggingface.co/docs/tokenizers)
+
+---
 
 ## License
-MIT License
+
+MIT License – See the `license` file for more details.
+
+Developed by **Ryan Akmal Pasya**, 2023.
+
+---
+
+Let me know if you want this saved as a downloadable file or want to extend this with examples, visual diagrams, or comparison to other tokenizers.
