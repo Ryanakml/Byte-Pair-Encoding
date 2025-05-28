@@ -19,7 +19,7 @@ except FileNotFoundError:
     exit(1)
 
 # Set hyperparameter ukuran vocabulary
-vocab_size = 1000
+vocab_size = 5000
 print(f"Training BPE model with vocabulary size: {vocab_size}")
 
 # Buat objek tokenizer BPE

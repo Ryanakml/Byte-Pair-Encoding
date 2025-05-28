@@ -215,7 +215,7 @@ class BPE():
                     else:
                         new_split.append(split[i])
                         i += 1
-                split_text[idx] = split # ['pl','a','y','i','n','g']
+                split_text[idx] = new_split # ['pl','a','y','i','n','g']
 
         result = sum(split_text, [])
         """
